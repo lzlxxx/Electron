@@ -1,8 +1,13 @@
-const {app,BrowserWindow}=require('electron')
+const {app,BrowserWindow,ipcMain}=require('electron')
+const path=require('path')
+const fs = require('fs')
 function createWindow(){
     const win = new BrowserWindow({
         width: 850,
         height: 600,
+        webPreferences: {
+            preload:path.join(__dirname,'preload.js')
+        }
     })
     win.loadFile('index.html')
     win.webContents.openDevTools()
@@ -17,9 +22,23 @@ function createAnotherWindow(parent){
     win.loadFile('second.html')
 }
 
+function handleSetTitle(event,title){
+    console.log('the event from ipcRenderer',event)
+    const webContents = event.sender
+    const win=BrowserWindow.fromWebContents(webContents)
+    win.setTitle(title)
 
+}
+
+async function handleWriteFile(event,content){
+    console.log('content',content)
+    await fs.promises.writeFile('test.txt',content)
+    const  stats=await fs.promises.stat('test.txt')
+    return stats.size
+}
 
 app.on('ready',()=>{
-    const parent = createWindow();
-    createAnotherWindow(parent);
+    ipcMain.on('set-title',handleSetTitle)
+    ipcMain.handle('write-file',handleWriteFile)
+    createWindow();
 })
