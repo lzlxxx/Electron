@@ -1,4 +1,6 @@
 const{contextBridge,ipcRenderer}=require('electron')
+const fs=require('fs')
+console.log('fs',fs)
 contextBridge.exposeInMainWorld('versions',{
     node:process.versions.node,
     chrome:process.versions.chrome,
@@ -9,7 +11,7 @@ contextBridge.exposeInMainWorld('electron',{
     onUpdateCounter: (callback)=>{
         ipcRenderer.on('update-counter',(_event,value) =>{
             callback(value)
-        })
-    }
+        })},
+    readFile:fs.promises.readFile
 })
-
+contextBridge.exposeInMainWorld('require',require)
