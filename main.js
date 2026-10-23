@@ -1,6 +1,9 @@
 const {app,BrowserWindow,ipcMain}=require('electron')
+const remote=require('@electron/remote/main')
 const path=require('path')
 const fs = require('fs')
+
+remote.initialize()//初始化
 function createWindow(){
     const win = new BrowserWindow({
         width: 850,
@@ -42,7 +45,8 @@ app.on('ready',()=>{
     ipcMain.on('set-title',handleSetTitle)
     ipcMain.handle('write-file',handleWriteFile)
     let counter=1
-    const win =createWindow();
+    const win =createWindow()
+    remote.enable(win.webContents)
     win.webContents.on('did-finish-load', () => {
     win.webContents.send('update-counter',counter)
     setInterval(()=>{
